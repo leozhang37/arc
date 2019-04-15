@@ -139,14 +139,14 @@ end
 	  
 	  case Enum.find(headers, fn {k, v}  ->   k == "Content-Type" end) do
 		  {k, v} ->
-			  case String.split(v) do
+			  case String.split(v, "/") do
 				  [image, ext] -> 
 					 "." <> ext
 				  _ ->
-					 ".jpeg"	  
+					 ""	  
 			  end	  
 		  nil ->
-			   ".jpeg"  
+			   ""  
 	  end
   end
 	  
