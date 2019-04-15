@@ -137,7 +137,7 @@ end
   
   defp get_extname(headers) do
 	  
-	  case Enum.find(headers, fn {k, v}  ->   k == "Content-Types" end) do
+	  case Enum.find(headers, fn {k, v}  ->   k == "Content-Type" end) do
 		  {k, v} ->
 			  case String.split(v) do
 				  [image, ext] -> 
