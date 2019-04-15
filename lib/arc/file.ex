@@ -16,9 +16,14 @@ defmodule Arc.File do
   def new(remote_path = "http" <> _) do
     uri = URI.parse(remote_path)
     filename = Path.basename(uri.path)
-
+	
     case save_file(uri, filename) do
-      {:ok, local_path} -> %Arc.File{path: local_path, file_name: filename}
+      {:ok, local_path} -> 
+		  file_name = case Path.extname(filename) do
+			  "" -> Path.basename(local_path)
+			  a -> filename
+		  end	  
+		  %Arc.File{path: local_path, file_name: file_name}
       :error -> {:error, :invalid_file_path}
     end
 end
@@ -57,21 +62,31 @@ end
   end
 
   defp save_file(uri, filename) do
-    local_path =
-      generate_temporary_path()
-      |> Kernel.<>(Path.extname(filename))
-
+	 
+	
+	    local_path =
+	      generate_temporary_path()
+	      |> Kernel.<>(Path.extname(filename))
+		  
     case save_temp_file(local_path, uri) do
-      :ok -> {:ok, local_path}
+      {:ok, file_path} -> {:ok, file_path}
       _ -> :error
     end
+	
   end
+  
+  
 
   defp save_temp_file(local_path, remote_path) do
     remote_file = get_remote_path(remote_path)
 
     case remote_file do
-      {:ok, body} -> File.write(local_path, body)
+
+	 
+      {:ok, body, header} -> 
+		  file_path = local_path <> get_extname(header)
+		  {File.write(file_path, body), file_path}
+
       {:error, error} -> {:error, error}
     end
   end
@@ -97,7 +112,7 @@ end
 
   defp request(remote_path, options, tries \\ 0) do
     case :hackney.get(URI.to_string(remote_path), [], "", options) do
-      {:ok, 200, _headers, client_ref} -> :hackney.body(client_ref)
+      {:ok, 200, _headers, client_ref} -> :hackney.body(client_ref) |> Tuple.append(_headers)
       {:error, %{reason: :timeout}} ->
         case retry(tries, options) do
           {:ok, :retry} -> request(remote_path, options, tries + 1)
@@ -119,4 +134,20 @@ end
       true -> {:error, :out_of_tries}
     end
   end
+  
+  defp get_extname(headers) do
+	  
+	  case Enum.find(headers, fn {k, v}  ->   k == "Content-Types" end) do
+		  {k, v} ->
+			  case String.split(v) do
+				  [image, ext] -> 
+					 "." <> ext
+				  _ ->
+					 ".jpeg"	  
+			  end	  
+		  nil ->
+			   ".jpeg"  
+	  end
+  end
+	  
 end
