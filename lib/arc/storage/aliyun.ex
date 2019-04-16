@@ -30,7 +30,7 @@ defmodule Arc.Storage.Aliyun do
        when is_binary(file_binary) do
     Object.put_object(s3_bucket, s3_key, file_binary, s3_options)
     |> case do
-      {:ok} -> {:ok, file.file_name}
+      {:ok, _} -> {:ok, file.file_name}
       {:error, error} -> {:error, error}
     end
   end
@@ -41,7 +41,7 @@ defmodule Arc.Storage.Aliyun do
       {:ok, file_binary} ->
         Object.put_object(s3_bucket, s3_key, file_binary, s3_options)
         |> case do
-          {:ok} -> {:ok, file.file_name}
+          {:ok, _} -> {:ok, file.file_name}
           {:error, error} -> {:error, error}
         end
 
