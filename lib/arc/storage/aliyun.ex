@@ -64,7 +64,7 @@ defmodule Arc.Storage.Aliyun do
   end
 
   defp build_signed_url(definition, version, file_and_scope, options) do
-    expires = Timex.now() |> Timex.shift(hours: 1) |> Time.to_unix()
+    expires = Timex.now() |> Timex.shift(hours: 1) |> Timex.to_unix()
     Object.object_url(s3_bucket(definition), s3_key(definition, version, file_and_scope), expires)
   end
 
