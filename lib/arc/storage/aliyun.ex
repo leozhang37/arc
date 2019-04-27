@@ -17,7 +17,12 @@ defmodule Arc.Storage.Aliyun do
   end
 
   def url(definition, version, file_and_scope, _options \\ []) do
-    build_signed_url(definition, version, file_and_scope, _options)
+      case Keyword.get(options, :signed, false) do
+        false -> build_url(definition, version, file_and_scope, options)
+        true  ->  build_signed_url(definition, version, file_and_scope, _options)
+		
+      end
+   
   end
 
   def delete(definition, version, {file, scope}) do
@@ -62,7 +67,10 @@ defmodule Arc.Storage.Aliyun do
       Arc.Definition.Versioning.resolve_file_name(definition, version, file_and_scope)
     ])
   end
-
+  defp build_url(definition, version, file_and_scope, options) do
+    
+    Object.object_url(s3_bucket(definition), s3_key(definition, version, file_and_scope))
+  end
   defp build_signed_url(definition, version, file_and_scope, options) do
     expires = Timex.now() |> Timex.shift(hours: 1) |> Timex.to_unix()
     Object.object_url(s3_bucket(definition), s3_key(definition, version, file_and_scope), expires)
