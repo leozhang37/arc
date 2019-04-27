@@ -17,8 +17,8 @@ defmodule Arc.Storage.Aliyun do
   end
 
   def url(definition, version, file_and_scope, _options \\ []) do
-      case Keyword.get(options, :signed, false) do
-        false -> build_url(definition, version, file_and_scope, options)
+      case Keyword.get(_options, :signed, false) do
+        false -> build_url(definition, version, file_and_scope, _options)
         true  ->  build_signed_url(definition, version, file_and_scope, _options)
 		
       end
